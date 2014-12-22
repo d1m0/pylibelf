@@ -1,7 +1,5 @@
 from ctypes import *
-
-# TODO: Hack! Should be getting this from types/
-EI_NIDENT = 16
+from libelf.constants import EI_NIDENT
 
 # Obtained from /usr/lib/elf.h
 
