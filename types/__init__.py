@@ -148,3 +148,70 @@ class Elf64_Phdr(Structure):
 		('p_memsz', Elf64_Xword), # Segment size in memory 
 		('p_align', Elf64_Xword), # Segment alignment 
   ]
+
+# /* Symbol table entry.  */
+class Elf32_Sym(Structure):
+  _fields_ = [
+		('st_name', Elf32_Word), # Symbol name (string tbl index) 
+		('st_value', Elf32_Addr), # Symbol value 
+		('st_size', Elf32_Word), # Symbol size 
+    ('st_info', c_char),    # Symbol type and binding 
+    ('st_other', c_char),   # Symbol visibility 
+		('st_shndx', Elf32_Section), # Section index 
+  ]
+
+class Elf64_Sym(Structure):
+  _fields_ = [
+		('st_name', Elf32_Word), # Symbol name (string tbl index) 
+		('st_value', Elf32_Addr), # Symbol value 
+		('st_size', Elf32_Word), # Symbol size 
+    ('st_info', c_char),   # Symbol type and binding 
+    ('st_other', c_char),  # Symbol visibility 
+		('st_shndx', Elf32_Section), # Section index 
+  ]
+
+#/* The syminfo section if available contains additional information about
+#   every dynamic symbol.  */
+
+class Elf32_Syminfo(Structure):
+  _fields_ = [
+		('si_boundto', Elf32_Half), # Direct bindings, symbol bound to 
+		('si_flags', Elf32_Half), # Per symbol flags 
+  ]
+
+class Elf64_Syminfo(Structure):
+  _fields_ = [
+		('si_boundto', Elf64_Half), # Direct bindings, symbol bound to 
+		('si_flags', Elf64_Half), # Per symbol flags 
+  ]
+
+# /* Relocation table entry without addend (in section of type SHT_REL).  */
+
+class Elf32_Rel(Structure):
+  _fields_ = [
+		('r_offset', Elf32_Addr), # Address 
+		('r_info', Elf32_Word), # Relocation type and symbol index 
+  ]
+
+class Elf64_Rel(Structure):
+  _fields_ = [
+		('r_offset', Elf64_Addr), # Address 
+		('r_info', Elf64_Xword), # Relocation type and symbol index 
+  ]
+
+# # Relocation table entry with addend (in section of type SHT_RELA).  
+
+class Elf32_Rela(Structure):
+  _fields_ = [
+		('r_offset', Elf32_Addr), # Address 
+		('r_info', Elf32_Word), # Relocation type and symbol index 
+		('r_addend', Elf32_Sword), # Addend 
+  ]
+
+class Elf64_Rela(Structure):
+  _fields_ = [
+		('r_offset', Elf64_Addr), # Address 
+		('r_info', Elf64_Xword), # Relocation type and symbol index 
+		('r_addend', Elf64_Sxword), # Addend 
+  ]
+
