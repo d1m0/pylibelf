@@ -160,12 +160,12 @@ class Elf32_Sym(Structure):
 
 class Elf64_Sym(Structure):
   _fields_ = [
-		('st_name', Elf32_Word), # Symbol name (string tbl index) 
-		('st_value', Elf32_Addr), # Symbol value 
-		('st_size', Elf32_Word), # Symbol size 
-    ('st_info', c_char),   # Symbol type and binding 
-    ('st_other', c_char),  # Symbol visibility 
-		('st_shndx', Elf32_Section), # Section index 
+		('st_name', Elf64_Word), # Symbol name (string tbl index) 
+    ('st_info', c_char), # Symbol type and binding 
+    ('st_other', c_char), # Symbol visibility 
+		('st_shndx', Elf64_Section), # Section index 
+		('st_value', Elf64_Addr), # Symbol value 
+		('st_size', Elf64_Xword), # Symbol size 
   ]
 
 #/* The syminfo section if available contains additional information about
