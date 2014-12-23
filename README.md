@@ -64,4 +64,20 @@ for s in sections(e):
   for d in data(s):
     for s in syms(e, d):
       print elf_strptr(e, strtab, s.st_name), s
+
+print "All relocation entries"
+for s in sections(e):
+  if (sectionType(s) == SHT_REL):
+    it = rels
+  elif (sectionType(s) == SHT_RELA):
+    it = relas
+  else:
+    continue
+
+  shdr = elf64_getshdr(s).contents
+  print sectionName(s), " relocation entries for ", elf_strptr(e, shstrtab, shdr.sh_link)
+  for d in data(s):
+    for s in it(e, d):
+      print s
+
 ```
