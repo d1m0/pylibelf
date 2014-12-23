@@ -57,16 +57,26 @@ def strings(strtab_data):
 
     start = end+1
 
-def syms(elf, strtab_data):
-  size = strtab_data.d_size
+def arr_iter(data, itemT):
+  size = data.d_size
 
-  symT = Elf32_Sym if (_is32(elf)) else Elf64_Sym
-  buf = cast(strtab_data.d_buf, POINTER(symT))
-
-  if size % sizeof(symT) != 0:
+  if size % sizeof(itemT) != 0:
     raise Exception("Data size not a multiple of symbol size!")
 
-  nelems = size / sizeof(symT)
+  buf = cast(data.d_buf, POINTER(itemT))
+  nelems = size / sizeof(itemT)
 
   for i in xrange(0, nelems):
     yield buf[i]
+
+def syms(elf, data):
+  symT = Elf32_Sym if (_is32(elf)) else Elf64_Sym
+  return arr_iter(data, symT)
+
+def rels(elf, data):
+  relT = Elf32_Rel if (_is32(elf)) else Elf64_Rel
+  return arr_iter(data, relT)
+
+def relas(elf, data):
+  relaT = Elf32_Rela if (_is32(elf)) else Elf64_Rela
+  return arr_iter(data, relaT)
