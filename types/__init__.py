@@ -213,3 +213,19 @@ class Elf64_Rela(Structure):
 		('r_addend', Elf64_Sxword), # Addend 
   ]
 
+time_t = c_int64
+uid_t = c_int32
+gid_t = c_int32
+mode_t = c_int32
+off_t = c_int64
+
+class Elf_Arhdr(Structure):
+  _fields_ = [
+    ('ar_name', c_char_p), 
+    ('ar_date', time_t), 
+    ('ar_uid', uid_t), 
+    ('ar_gid', gid_t), 
+    ('ar_mode', mode_t), 
+    ('ar_size', off_t), 
+    ('ar_fmag', POINTER(c_char)), 
+  ]

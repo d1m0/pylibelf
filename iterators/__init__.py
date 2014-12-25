@@ -4,25 +4,22 @@ import libelf
 from libelf import *
 from libelf.constants import *
 from libelf.types import *
+from libelf.util import *
 from ctypes import *
 
-def _class(elf):  elf_getident(elf, None)[EI_CLASS]
-
-def _is32(elf):   _class(elf) == ELFCLASS32 
-def _is64(elf):   _class(elf) == ELFCLASS64 
-
-def select(elf, fname):
-  if _is32(elf):
-    return libelf.__getattribute__('elf32_' + fname)
-  else:
-    return libelf.__getattribute__('elf64_' + fname)
-
-def sections(elf):
+def sections(elf, **kwargs):
   i = None
   while 1:
     i = elf_nextscn(elf, i)
     if (not bool(i)):
       break
+
+    try:
+      if ('name' in kwargs and section_name(elf, i) != kwargs['name']):
+        continue
+    except ValueError:
+      print "Error iterating over section ", i
+      continue
 
     yield i.contents
 
@@ -80,3 +77,18 @@ def rels(elf, data):
 def relas(elf, data):
   relaT = Elf32_Rela if (_is32(elf)) else Elf64_Rela
   return arr_iter(data, relaT)
+
+def elfs(fname):
+  fd = os.open(fname, os.O_RDONLY)
+  ar = elf_begin(fd, ELF_C_READ, None)
+  
+  i = None
+  while 1:
+    i = elf_begin(fd, ELF_C_READ, ar)
+    if (not bool(i)):
+      break
+
+    yield i
+
+  elf_end(ar)
+  os.close(fd)
