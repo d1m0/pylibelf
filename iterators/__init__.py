@@ -17,6 +17,15 @@ def sections(elf, **kwargs):
     try:
       if ('name' in kwargs and section_name(elf, i) != kwargs['name']):
         continue
+
+      if ('type' in kwargs and section_type(elf, i) != kwargs['type']):
+        continue
+
+      if ('link' in kwargs and section_link(elf, i) != kwargs['link']):
+        continue
+
+      if ('info' in kwargs and section_hdr(elf, i).sh_info != kwargs['info']):
+        continue
     except ValueError:
       print "Error iterating over section ", i
       continue
@@ -54,7 +63,7 @@ def strings(strtab_data):
 
     start = end+1
 
-def arr_iter(data, itemT):
+def arr_iter(data, itemT, ind = False):
   size = data.d_size
 
   if size % sizeof(itemT) != 0:
@@ -64,19 +73,67 @@ def arr_iter(data, itemT):
   nelems = size / sizeof(itemT)
 
   for i in xrange(0, nelems):
-    yield buf[i]
+    if ind:
+      yield (i, buf[i])
+    else:
+      yield buf[i]
 
-def syms(elf, data):
-  symT = Elf32_Sym if (_is32(elf)) else Elf64_Sym
-  return arr_iter(data, symT)
+def syms(elf, v = None):
+  symT = Elf32_Sym if (is32(elf)) else Elf64_Sym
+  if v == None:
+    for s in sections(elf, type=SHT_SYMTAB):
+      for d in data(s):
+        for (ind, sym) in arr_iter(d, symT, True):
+          yield (ind, sym)
+  elif isinstance(v, Elf_Scn):
+    for d in data(v):
+      for (ind, sym) in arr_iter(d, symT, True):
+        yield (ind, sym)
+  else:
+    assert isinstance(v, Elf_Data)
+    for (ind, sym) in arr_iter(v, symT, True):
+      yield (ind, sym)
 
-def rels(elf, data):
-  relT = Elf32_Rel if (_is32(elf)) else Elf64_Rel
-  return arr_iter(data, relT)
+def rels(elf, **kwargs):
+  relT = Elf32_Rel if (is32(elf)) else Elf64_Rel
+  if 'section' in kwargs:
+    secl = sections(elf, type = SHT_REL, info = kwargs['section'])
+  else:
+    secl = sections(elf, type = SHT_REL)
 
-def relas(elf, data):
-  relaT = Elf32_Rela if (_is32(elf)) else Elf64_Rela
-  return arr_iter(data, relaT)
+
+  if 'range' in kwargs:
+    for scn in secl:
+      for d in data(scn):
+        for rel in arr_iter(d, relT):
+          if (rel.r_offset >= kwargs['range'][0] and
+             rel.r_offset < kwargs['range'][1]):
+            yield (rel, section_hdr(elf, scn).sh_link)
+  else:
+    for scn in secl:
+      for d in data(scn):
+        for rel in arr_iter(d, relT):
+          yield (rel, section_hdr(elf, scn).sh_link)
+
+def relas(elf, **kwargs):
+  relT = Elf32_Rela if (is32(elf)) else Elf64_Rela
+  if 'section' in kwargs:
+    secl = list(sections(elf, type = SHT_RELA, info = kwargs['section']))
+  else:
+    secl = list(sections(elf, type = SHT_RELA))
+
+  if 'range' in kwargs:
+    for scn in secl:
+      for d in data(scn):
+        for rel in arr_iter(d, relT):
+          if (rel.r_offset  + rel.r_addend >= kwargs['range'][0] and
+             rel.r_offset + rel.r_addend < kwargs['range'][1]):
+            yield (rel, section_hdr(elf, scn).sh_link)
+  else:
+    for s in secl:
+      for d in data(scn):
+        for rel in arr_iter(d, relT):
+          yield (rel, section_hdr(elf, scn).sh_link)
 
 def elfs(fname):
   fd = os.open(fname, os.O_RDONLY)
