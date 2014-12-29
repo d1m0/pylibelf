@@ -15,3 +15,23 @@ def ELF64_R_TYPE(i):
 
 def ELF64_R_INFO(sym, typ):
   return ((sym << 32) + (typ & 0xffffffffL))
+
+# symbol st_info
+
+def ELF32_ST_BIND(val):
+  return val >> 4
+
+def ELF32_ST_TYPE(val):
+  return val & 0xf
+
+def ELF32_ST_INFO(bind, type):
+  return (((bind) << 4) + ((type) & 0xf))
+
+def ELF64_ST_BIND(val):
+  return ELF32_ST_BIND(val)
+
+def ELF64_ST_TYPE(val):
+  return ELF32_ST_TYPE(val)
+
+def ELF64_ST_INFO(bind, type):
+  return ELF32_ST_INFO(bind, type)
