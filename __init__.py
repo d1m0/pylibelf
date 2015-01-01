@@ -2,7 +2,7 @@ from types import *
 from constants import *
 from ctypes import *
 
-lelf=CDLL("libelf.so.0.8.13")
+lelf=CDLL("libelf.so.1")
 
 __all__ = []
 
@@ -117,9 +117,6 @@ define(lelf.elf64_newehdr, [ ElfP ], POINTER(Elf64_Ehdr), nonNullDec)
 define(lelf.elf64_newphdr, [ ElfP, c_size_t ], POINTER(Elf64_Phdr), nonNullDec)
 define(lelf.elf64_xlatetof, [ Elf_DataP, Elf_DataP, c_uint ], Elf_DataP, nonNullDec)
 define(lelf.elf64_xlatetom, [ Elf_DataP, Elf_DataP, c_uint ], Elf_DataP, nonNullDec)
-
-# Extensions
-define(lelf.elfx_update_shstrndx, [ ElfP, c_size_t ], c_int)
 
 # NOTE(dbounov): Ignoring gelf functions for now
 
