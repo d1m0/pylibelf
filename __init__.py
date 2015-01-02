@@ -2,7 +2,7 @@ from types import *
 from constants import *
 from ctypes import *
 
-lelf=CDLL("libelf.so.1")
+lelf=CDLL("libelf.so")
 
 __all__ = []
 
