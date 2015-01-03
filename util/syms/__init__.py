@@ -33,6 +33,19 @@ def derefSymbol(elf, s):
  
     return r 
 
+def derefSymbolFull(elf, s): 
+  """ Given an elf file and a Elf{32/64}_Sym defined in the elf file,
+      return a tuple with the contents of memory refered to by the symbol,
+      and any Rel's and Rela's inside that memory.
+  """
+  assert (defined(s))
+  contents = derefSymbol(elf, s)
+  relL = list(rels(elf, section=s.st_shndx, \
+    range=(s.st_value, s.st_size + s.st_value)))
+  relaL = list(relas(elf, section=s.st_shndx, \
+    range=(s.st_value, s.st_size + s.st_value)))
+  return (contents, relL, relaL)
+
 # Given a symbol name return the symbol and section in which it occurs
 def findSymbol(elf, s):
   for scn in sections(elf, type=SHT_SYMTAB):

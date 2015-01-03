@@ -9,6 +9,14 @@ from ctypes import *
 
 def sections(elf, **kwargs):
   i = None
+  if 'info' in kwargs:
+    if (isinstance(kwargs['info'], Elf_Scn)):
+      info = elf_ndxscn(kwargs['info'])
+    else:
+      print type(kwargs['info'])
+      info = kwargs['info']
+  else:
+    info = None
   while 1:
     i = elf_nextscn(elf, i)
     if (not bool(i)):
@@ -24,7 +32,7 @@ def sections(elf, **kwargs):
       if ('link' in kwargs and section_link(elf, i) != kwargs['link']):
         continue
 
-      if ('info' in kwargs and section_hdr(elf, i).sh_info != kwargs['info']):
+      if (info != None and section_hdr(elf, i).sh_info != info):
         continue
     except ValueError:
       print "Error iterating over section ", i
@@ -52,16 +60,31 @@ def data(elf_scn):
 
     yield i.contents
 
-def strings(strtab_data):
-  size = strtab_data.d_size
-  buf = cast(strtab_data.d_buf, POINTER(c_char))
-  start = 0;
-  while start < size:
-    end = start;
-    while buf[end] != '\x00': end += 1
-    yield (strtab_data.d_off + start, buf[start:end])
+def strings(v):
+  if (isinstance(v, Elf_Data)):
+    strtab_data = v
+    size = strtab_data.d_size
+    buf = cast(strtab_data.d_buf, POINTER(c_char))
+    start = 0;
+    while start < size:
+      end = start;
+      while buf[end] != '\x00': end += 1
+      yield (strtab_data.d_off + start, buf[start:end])
 
-    start = end+1
+      start = end+1
+  elif (isinstance(v, Elf_Scn)):
+    for d in data(v):
+      strtab_data = d
+      size = strtab_data.d_size
+      buf = cast(strtab_data.d_buf, POINTER(c_char))
+      start = 0;
+      while start < size:
+        end = start;
+        while buf[end] != '\x00': end += 1
+        yield (strtab_data.d_off + start, buf[start:end])
+
+        start = end+1
+      
 
 def arr_iter(data, itemT, ind = False):
   size = data.d_size
@@ -118,7 +141,10 @@ def rels(elf, **kwargs):
 def relas(elf, **kwargs):
   relT = Elf32_Rela if (is32(elf)) else Elf64_Rela
   if 'section' in kwargs:
-    secl = list(sections(elf, type = SHT_RELA, info = kwargs['section']))
+    scn = kwargs['section']
+    if (type(scn) == str):  scn = list(sections(elf, name=scn))[0]
+    if (isinstance(scn, Elf_Scn)):  scn = elf_ndxscn(byref(scn))
+    secl = list(sections(elf, type = SHT_RELA, info = scn))
   else:
     secl = list(sections(elf, type = SHT_RELA))
 
