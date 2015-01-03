@@ -5,10 +5,10 @@ from libelf.constants import *
 from ctypes import *
 import os
 
-def _class(elf):  elf_getident(elf, None)[EI_CLASS]
+def _class(elf):  return elf_getident(elf, None)[EI_CLASS]
 
-def is32(elf):   _class(elf) == ELFCLASS32 
-def is64(elf):   _class(elf) == ELFCLASS64 
+def is32(elf):   return _class(elf) == ELFCLASS32 
+def is64(elf):   return _class(elf) == ELFCLASS64 
 
 def select(elf, fname):
   if is32(elf):
