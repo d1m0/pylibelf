@@ -1,7 +1,6 @@
-from libelf import *
-from libelf.types import *
-from libelf.iterators import *
-from libelf.util import *
+from .. import *
+from ...types import *
+from ...iterators import *
 
 def defined(s): return s.st_shndx != SHN_UNDEF
 

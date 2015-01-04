@@ -1,7 +1,6 @@
-import libelf
-from libelf import *
-from libelf.types import *
-from libelf.constants import *
+from .. import *
+from ..types import *
+from ..constants import *
 from ctypes import *
 import os
 
@@ -12,9 +11,9 @@ def is64(elf):   return _class(elf) == ELFCLASS64
 
 def select(elf, fname):
   if is32(elf):
-    return libelf.__getattribute__('elf32_' + fname)
+    return globals()['elf32_' + fname]
   else:
-    return libelf.__getattribute__('elf64_' + fname)
+    return globals()['elf64_' + fname]
 
 def section_name(elfP, secP):
   shstrndx = c_size_t()

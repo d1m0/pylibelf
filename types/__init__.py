@@ -1,5 +1,5 @@
 from ctypes import *
-from libelf.constants import EI_NIDENT
+from ..constants import EI_NIDENT
 
 # Obtained from /usr/lib/elf.h
 

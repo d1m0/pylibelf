@@ -1,10 +1,9 @@
 import sys
 import os
-import libelf
-from libelf import *
-from libelf.constants import *
-from libelf.types import *
-from libelf.util import *
+from .. import *
+from ..constants import *
+from ..types import *
+from ..util import *
 from ctypes import *
 
 def sections(elf, **kwargs):
