@@ -42,8 +42,10 @@ Elf_IdentT = c_char * EI_NIDENT
 Elf_Cmd = c_int
 
 # Libelf opaque handles
-class Elf(Structure): pass; 
-class Elf_Scn(Structure): pass; 
+class Elf(Structure):
+  _fields_ = [] 
+class Elf_Scn(Structure):
+  _fields_ = [] 
 
 class Elf_Data(Structure):
   _fields_ = [
