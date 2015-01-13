@@ -54,4 +54,6 @@ docs/_build/
 target/
 
 *.swp
+*.swo
+*.swn
 
