@@ -17,13 +17,15 @@ def derefSymbol(elf, s):
     raise Exception("NYI") 
   else: 
     scn = elf_getscn(elf, s.st_shndx) 
+    shdr = section_hdr(elf, scn);
     off = 0 
+    base = shdr.sh_addr if shdr.sh_addr != 0 else 0
     start = s.st_value 
     end = s.st_value + s.st_size 
     r = '' 
     for d in data(scn): 
       if start >= end:  break; 
-      off = d.d_off 
+      off = base + d.d_off 
       if start >= off and start < off + d.d_size: 
         c = cast(d.d_buf, POINTER(c_char)) 
         l = min(off + d.d_size, end) - start 
