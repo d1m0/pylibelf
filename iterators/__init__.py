@@ -83,7 +83,7 @@ def strings(v):
         yield (strtab_data.d_off + start, buf[start:end])
 
         start = end+1
-      
+
 
 def arr_iter(data, itemT, ind = False):
   size = data.d_size
@@ -155,15 +155,24 @@ def relas(elf, **kwargs):
              rel.r_offset + rel.r_addend < kwargs['range'][1]):
             yield (rel, section_hdr(elf, scn).sh_link)
   else:
-    for s in secl:
-      for d in data(scn):
-        for rel in arr_iter(d, relT):
-          yield (rel, section_hdr(elf, scn).sh_link)
+    addSecId = kwargs['withSectionId']==True \
+        if 'withSectionId' in kwargs \
+        else False
+    if not addSecId:
+      for scn in secl:
+        for d in data(scn):
+          for rel in arr_iter(d, relT):
+            yield (rel, section_hdr(elf, scn).sh_link)
+    else:
+      for scn in secl:
+        for d in data(scn):
+          for rel in arr_iter(d, relT):
+            yield (rel, section_hdr(elf, scn).sh_info)
 
 def elfs(fname):
   fd = os.open(fname, os.O_RDONLY)
   ar = elf_begin(fd, ELF_C_READ, None)
-  
+
   i = None
   while 1:
     i = elf_begin(fd, ELF_C_READ, ar)
