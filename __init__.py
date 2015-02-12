@@ -6,6 +6,8 @@ lelf=CDLL("libelf.so.0")
 
 __all__ = []
 
+all_objs = []
+
 class ElfError(Exception):
   def __init__(self, msg):
     self.msg = msg
@@ -22,6 +24,7 @@ def nonNullDec(f):
     res = f(*args)
     try:
       a = res.contents
+      all_objs.append(res)
     except ValueError: # NULL
       raise ElfError(f.__name__ + " returned NULL")
     return res
@@ -76,7 +79,7 @@ define(lelf.elf_flagelf,  [ ElfP, c_int, c_uint ], c_uint)
 define(lelf.elf_flagphdr, [ ElfP, c_int, c_uint ], c_uint)
 define(lelf.elf_flagscn,  [ Elf_ScnP, c_int, c_uint ], c_uint)
 define(lelf.elf_flagshdr, [ Elf_ScnP, c_int, c_uint ], c_uint)
-define(lelf.elf_getarhdr, [ ElfP ], POINTER(Elf_Arhdr), nonNullDec)
+define(lelf.elf_getarhdr, [ ElfP ], POINTER(Elf_Arhdr))
 #define(lelf.elf_getarsym, [ ], )
 define(lelf.elf_getbase, [ ElfP ], off_t, nonNegDec)
 define(lelf.elf_getdata, [ Elf_ScnP, Elf_DataP ], Elf_DataP)
@@ -92,7 +95,7 @@ define(lelf.elf_newscn, [ ElfP ], Elf_ScnP, nonNullDec)
 #define(lelf.elf_next, [ ], )
 define(lelf.elf_nextscn, [ ElfP, Elf_ScnP ], Elf_ScnP)
 #define(lelf.elf_rand, [ ], )
-#define(lelf.elf_rawdata, [ ], )
+define(lelf.elf_rawdata, [ Elf_ScnP, Elf_DataP ], Elf_DataP)
 #define(lelf.elf_rawfile, [ ], )
 define(lelf.elf_strptr, [ ElfP, c_size_t, c_size_t ], c_char_p)
 define(lelf.elf_update, [ ElfP, c_int], off_t, nonNegDec)

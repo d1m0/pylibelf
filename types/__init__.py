@@ -41,13 +41,23 @@ Elf_IdentT = c_char * EI_NIDENT
 
 Elf_Cmd = c_int
 
+class _ElfStructure(Structure):
+  def __str__(self):
+    return self.__class__.__name__ + '(' + \
+      ','.join([field[0] + '=' + str(getattr(self, field[0])) for field in self._fields_])  + ')'
+
+class _ElfUnion(Union):
+  def __str__(self):
+    return self.__class__.__name__ + '(' + \
+      ','.join([field[0] + '=' + str(getattr(self, field[0])) for field in self._fields_])  + ')'
+
 # Libelf opaque handles
-class Elf(Structure):
+class Elf(_ElfStructure):
   _fields_ = [] 
-class Elf_Scn(Structure):
+class Elf_Scn(_ElfStructure):
   _fields_ = [] 
 
-class Elf_Data(Structure):
+class Elf_Data(_ElfStructure):
   _fields_ = [
     ('d_buf', c_void_p),
     ('d_type', c_int),
@@ -61,7 +71,7 @@ ElfP = POINTER(Elf)
 Elf_ScnP = POINTER(Elf_Scn)
 Elf_DataP = POINTER(Elf_Data)
 
-class Elf32_Ehdr(Structure):
+class Elf32_Ehdr(_ElfStructure):
   _fields_ = [
     ('e_ident',   Elf_IdentT ), # Magic number and other info 
     ('e_type',   Elf32_Half ),     # Object file type 
@@ -79,7 +89,7 @@ class Elf32_Ehdr(Structure):
     ('e_shstrndx',   Elf32_Half ),   # Section header string table index 
   ]
 
-class Elf64_Ehdr(Structure):
+class Elf64_Ehdr(_ElfStructure):
   _fields_ = [
     ('e_ident',   Elf_IdentT ), # Magic number and other info 
     ('e_type',   Elf64_Half ),     # Object file type 
@@ -97,7 +107,7 @@ class Elf64_Ehdr(Structure):
     ('e_shstrndx',   Elf64_Half ),   # Section header string table index 
  ] 
 
-class Elf32_Shdr(Structure):
+class Elf32_Shdr(_ElfStructure):
   _fields_ = [
 		('sh_name', Elf32_Word), # Section name (string tbl index) 
 		('sh_type', Elf32_Word), # Section type 
@@ -111,7 +121,7 @@ class Elf32_Shdr(Structure):
 		('sh_entsize', Elf32_Word), # Entry size if section holds table 
  ] 
 
-class Elf64_Shdr(Structure):
+class Elf64_Shdr(_ElfStructure):
   _fields_ = [
 		('sh_name', Elf64_Word), # Section name (string tbl index) 
 		('sh_type', Elf64_Word), # Section type 
@@ -125,7 +135,7 @@ class Elf64_Shdr(Structure):
 		('sh_entsize', Elf64_Xword), # Entry size if section holds table 
  ] 
 
-class Elf32_Phdr(Structure):
+class Elf32_Phdr(_ElfStructure):
   _fields_ = [
 		('p_type', Elf32_Word), # Segment type 
 		('p_offset', Elf32_Off), # Segment file offset 
@@ -137,7 +147,7 @@ class Elf32_Phdr(Structure):
 		('p_align', Elf32_Word), # Segment alignment 
   ]
 
-class Elf64_Phdr(Structure):
+class Elf64_Phdr(_ElfStructure):
   _fields_ = [
 		('p_type', Elf64_Word), # Segment type 
 		('p_flags', Elf64_Word), # Segment flags 
@@ -150,7 +160,7 @@ class Elf64_Phdr(Structure):
   ]
 
 # /* Symbol table entry.  */
-class Elf32_Sym(Structure):
+class Elf32_Sym(_ElfStructure):
   _fields_ = [
 		('st_name', Elf32_Word), # Symbol name (string tbl index) 
 		('st_value', Elf32_Addr), # Symbol value 
@@ -160,7 +170,7 @@ class Elf32_Sym(Structure):
 		('st_shndx', Elf32_Section), # Section index 
   ]
 
-class Elf64_Sym(Structure):
+class Elf64_Sym(_ElfStructure):
   _fields_ = [
 		('st_name', Elf64_Word), # Symbol name (string tbl index) 
     ('st_info', c_char), # Symbol type and binding 
@@ -173,13 +183,13 @@ class Elf64_Sym(Structure):
 #/* The syminfo section if available contains additional information about
 #   every dynamic symbol.  */
 
-class Elf32_Syminfo(Structure):
+class Elf32_Syminfo(_ElfStructure):
   _fields_ = [
 		('si_boundto', Elf32_Half), # Direct bindings, symbol bound to 
 		('si_flags', Elf32_Half), # Per symbol flags 
   ]
 
-class Elf64_Syminfo(Structure):
+class Elf64_Syminfo(_ElfStructure):
   _fields_ = [
 		('si_boundto', Elf64_Half), # Direct bindings, symbol bound to 
 		('si_flags', Elf64_Half), # Per symbol flags 
@@ -187,13 +197,13 @@ class Elf64_Syminfo(Structure):
 
 # /* Relocation table entry without addend (in section of type SHT_REL).  */
 
-class Elf32_Rel(Structure):
+class Elf32_Rel(_ElfStructure):
   _fields_ = [
 		('r_offset', Elf32_Addr), # Address 
 		('r_info', Elf32_Word), # Relocation type and symbol index 
   ]
 
-class Elf64_Rel(Structure):
+class Elf64_Rel(_ElfStructure):
   _fields_ = [
 		('r_offset', Elf64_Addr), # Address 
 		('r_info', Elf64_Xword), # Relocation type and symbol index 
@@ -201,14 +211,14 @@ class Elf64_Rel(Structure):
 
 # # Relocation table entry with addend (in section of type SHT_RELA).  
 
-class Elf32_Rela(Structure):
+class Elf32_Rela(_ElfStructure):
   _fields_ = [
 		('r_offset', Elf32_Addr), # Address 
 		('r_info', Elf32_Word), # Relocation type and symbol index 
 		('r_addend', Elf32_Sword), # Addend 
   ]
 
-class Elf64_Rela(Structure):
+class Elf64_Rela(_ElfStructure):
   _fields_ = [
 		('r_offset', Elf64_Addr), # Address 
 		('r_info', Elf64_Xword), # Relocation type and symbol index 
@@ -221,7 +231,7 @@ gid_t = c_int32
 mode_t = c_int32
 off_t = c_int64
 
-class Elf_Arhdr(Structure):
+class Elf_Arhdr(_ElfStructure):
   _fields_ = [
     ('ar_name', c_char_p), 
     ('ar_date', time_t), 
@@ -230,4 +240,35 @@ class Elf_Arhdr(Structure):
     ('ar_mode', mode_t), 
     ('ar_size', off_t), 
     ('ar_fmag', POINTER(c_char)), 
+  ]
+
+class _Elf64_DynUnion(_ElfUnion):
+  _fields_ = [
+    ('d_val', Elf64_Xword),
+    ('d_ptr', Elf64_Addr),
+  ]
+
+class Elf64_Dyn(_ElfStructure):
+  _fields_ = [
+    ('d_tag', Elf64_Xword), 
+    ('d_un', _Elf64_DynUnion),
+  ]
+
+# GNU Extensions
+class Elf64_Verneed(_ElfStructure):
+  _fields_ = [
+    ('vn_version', Elf64_Half), 
+    ('vn_cnt', Elf64_Half), 
+    ('vn_file', Elf64_Word), 
+    ('vn_aux', Elf64_Word), 
+    ('vn_next', Elf64_Word), 
+  ]
+
+class Elf64_Vernaux(_ElfStructure):
+  _fields_ = [
+    ('vna_hash', Elf64_Word), 
+    ('vna_flags', Elf64_Half), 
+    ('vna_other', Elf64_Half), 
+    ('vna_name', Elf64_Word), 
+    ('vna_next', Elf64_Word), 
   ]

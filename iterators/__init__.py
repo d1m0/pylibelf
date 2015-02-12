@@ -12,7 +12,6 @@ def sections(elf, **kwargs):
     if (isinstance(kwargs['info'], Elf_Scn)):
       info = elf_ndxscn(kwargs['info'])
     else:
-      print type(kwargs['info'])
       info = kwargs['info']
   else:
     info = None
@@ -48,6 +47,13 @@ def shdrs(elf):
 
     yield select(elf, 'getshdr')(i.contents).contents
 
+def phdrs(elf):
+  phdrTbl = select(elf, "getphdr")(elf)
+  ehdr = select(elf, "getehdr")(elf).contents
+  phdrCnt = ehdr.e_phnum
+
+  for i in xrange(0, phdrCnt):
+    yield phdrTbl[i]
 
 def data(elf_scn):
   i = None
@@ -103,7 +109,12 @@ def arr_iter(data, itemT, ind = False):
 def syms(elf, v = None):
   symT = Elf32_Sym if (is32(elf)) else Elf64_Sym
   if v == None:
-    for s in sections(elf, type=SHT_SYMTAB):
+    for s in sections(elf):
+      hdr = section_hdr(elf, s)
+
+      if (hdr.sh_type != SHT_SYMTAB and hdr.sh_type != SHT_DYNSYM):
+        continue
+
       for d in data(s):
         for (ind, sym) in arr_iter(d, symT, True):
           yield (ind, sym)
@@ -160,6 +171,18 @@ def relas(elf, **kwargs):
         for rel in arr_iter(d, relT):
           yield (rel, section_hdr(elf, scn).sh_link)
 
+def getOnlyData(scn):
+  d = elf_getdata(scn, None);
+  assert bool(elf_getdata(scn, d)) == False
+  return d
+
+def dyns(elf):
+  relT = Elf64_Dyn
+  for scn in sections(elf, name=".dynamic"):
+    for d in data(scn):
+      for dyn in arr_iter(d, relT):
+        yield dyn
+
 def elfs(fname):
   fd = os.open(fname, os.O_RDONLY)
   ar = elf_begin(fd, ELF_C_READ, None)
@@ -174,3 +197,4 @@ def elfs(fname):
 
   elf_end(ar)
   os.close(fd)
+
