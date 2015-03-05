@@ -8,6 +8,7 @@ from ctypes import *
 
 def sections(elf, **kwargs):
   i = None
+  ndx = 0 # we skip the first null section
   if 'info' in kwargs:
     if (isinstance(kwargs['info'], Elf_Scn)):
       info = elf_ndxscn(kwargs['info'])
@@ -17,6 +18,8 @@ def sections(elf, **kwargs):
     info = None
   while 1:
     i = elf_nextscn(elf, i)
+    ndx += 1
+
     if (not bool(i)):
       break
 
@@ -36,7 +39,11 @@ def sections(elf, **kwargs):
       print "Error iterating over section ", i
       continue
 
-    yield i.contents
+    if ('ndx' in kwargs and kwargs['ndx']):
+      yield (ndx, i.contents)
+    else:
+      yield i.contents
+
 
 def shdrs(elf):
   i = None
